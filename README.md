@@ -20,6 +20,8 @@ Major libraries used on server:
 
 ---
 
+This work is based on https://github.com/xims/X-ttt
+
 ### View it online at 
 https://x-ttt.herokuapp.com/
 
