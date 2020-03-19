@@ -22,6 +22,7 @@ import prep_env from './models/prep_env'
 
 
 let renderSite = function () {
+	console.log("bwa1")
 	return render((
 		<Router history={browserHistory}>
 			<Route path='/' component={Main}>
@@ -84,6 +85,9 @@ app.extend({
 	},
 
 	start () {
+
+		console.log("BW here A1")
+
 		const history = useBasename(createHistory)({
 			// basename: document.getElementsByTagName('base')[0] ? document.getElementsByTagName('base')[0].getAttribute('href') : ''
 			basename: base_dir

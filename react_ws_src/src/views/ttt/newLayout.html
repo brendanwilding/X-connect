@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html>
+
+<!-- this was used to make the game in JS alone first before integration with Xttt-->
+
+<head>
+
+    <style>
+        .insert_area {
+
+            padding: 12px;
+            white-space: nowrap;
+
+        }
+
+        .insert_cell {
+            background-color: #eee;
+            width: 50px;
+            height: 50px;
+
+            border-radius: 27px;
+
+            margin: 5px;
+            border: 2px solid #b6b6b6;
+
+            display: inline-block;
+        }
+
+        .insert_cell:hover {
+            background-color: rgb(152, 248, 255);
+            cursor: pointer;
+        }
+
+        .game_area {
+
+            background-color: #00a2ff;
+            display: inline-block;
+            padding: 10px;
+            border: 2px solid #0075b9;
+            white-space: nowrap;
+
+        }
+
+        .game_row {}
+
+        .game_cell {
+
+            background-color: #eee;
+            width: 50px;
+            height: 50px;
+            border-radius: 27px;
+
+            margin: 5px;
+            border: 2px solid #0075b9;
+
+            display: inline-block;
+
+        }
+
+        .player_one_occupied {
+            background-color: #ff605b;
+        }
+
+        .player_two_occupied {
+            background-color: #fff34a;
+        }
+
+        .game_end {
+            /*background-color: #363636;*/
+            width: 50px;
+            height: 50px;
+            border-radius: 27px;
+
+            margin: 5px;
+            border: 2px solid rgb(69, 255, 84);
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <div id="message">Click setup to re-start</div><br><br>
+
+    <label>Columns</label>
+    <input id="column_input" type="number" value=7><br><br>
+    <label>Rows</label>
+    <input id="row_input" type="number" value=6><br><br>
+    <label>Connect</label>
+    <input id="connect_input" type="number" value=4><br><br>
+    <button onclick="setupGame()">Setup</button><br><br>
+
+    <div id="gameConnectX"></div>
+
+</body>
+
+<script>
+
+    let columnCount = 7
+    let rowCount = 6
+    let connectCount = 4
+    let gameEnded = true
+
+    let currentPlayer = { 'playernumber': 1 } //we need to be able to edit this
+
+    let gameElements = null
+    let gameData = null
+
+    function buildGameData(columnCount, rowCount) {
+        //let the game data be a 2d grid holding the state of the game
+        //0 = unoccupied, 1 = player 1 occupied, 2 = player 2 occupied
+        let newGameData = new Array()
+        for (let i = 0; i < rowCount; i++) {
+            let newGameDataRow = new Array()
+            for (let j = 0; j < columnCount; j++) {
+                newGameDataRow.push(0)
+            }
+            newGameData.push(newGameDataRow)
+        }
+        return newGameData
+    }
+
+    function buildGame(columnCount, rowCount) {
+        //returns a 2D list of the elements for convenience
+
+        let game = document.getElementById("gameConnectX")
+        //console.log(game)
+
+        let insertArea = document.createElement("div")
+        insertArea.id = "insertArea"
+        insertArea.classList.add("insert_area")
+
+        for (let i = 0; i < columnCount; i++) {
+            let newInsertCell = document.createElement("div")
+            newInsertCell.id = "insertCell_" + i
+
+            newInsertCell.classList.add("insert_cell")
+
+            newInsertCell.addEventListener("click", () => { insertCellClick(i) })
+
+            insertArea.appendChild(newInsertCell)
+        }
+
+        game.appendChild(insertArea)
+
+        let gameArea = document.createElement("div")
+        gameArea.id = "gameArea"
+        gameArea.classList.add("game_area")
+
+        let newGameElements = new Array()
+
+        for (let i = 0; i < rowCount; i++) {
+            let gameAreaRow = document.createElement("div")
+            gameAreaRow.id = "gameAreaRow_" + i
+            gameAreaRow.classList.add("game_row")
+            newGameElements.push(new Array())
+
+            for (let j = 0; j < columnCount; j++) {
+                let newGameCell = document.createElement("div")
+                newGameCell.id = "gameCell_" + i + "_" + j
+                newGameCell.classList.add("game_cell")
+
+                gameAreaRow.appendChild(newGameCell)
+                newGameElements[i].push(newGameCell)
+
+            }
+
+            gameArea.appendChild(gameAreaRow)
+        }
+
+        game.appendChild(gameArea)
+        return newGameElements
+
+    }
+
+    function insertCellClick(cellNumber) {
+        //console.log("Element click: " + cellNumber)
+        insertCell(cellNumber, currentPlayer)
+    }
+
+    function insertCell(cellNumber, player) {
+        if (gameEnded) return
+        //Check to see if this is a legal move
+
+        let legalMove = false
+        // for each row, starting at the bottom
+        let i
+        for (i = gameData.length - 1; i >= 0; i--) {
+            if (gameData[i][cellNumber] === 0) {
+                legalMove = true
+                break
+            }
+        }
+
+        //console.log("Legal move:" + legalMove + ", player: " + player['playernumber'])
+
+        //Update the game data
+        if (legalMove === true) {
+
+            gameData[i][cellNumber] = player['playernumber']
+
+            //console.log(gameElements)
+            //console.log(gameElements[i][cellNumber])
+
+            //update the visuals
+            if (player['playernumber'] === 1) {
+                gameElements[i][cellNumber].classList.add("player_one_occupied")
+                //Go to next player
+                player['playernumber'] = 2
+            } else {
+                gameElements[i][cellNumber].classList.add("player_two_occupied")
+                //Go to next player
+                player['playernumber'] = 1
+            }
+
+            //check end game
+            checkEndgame()
+            checkDrawGame()
+
+        }
+
+    }
+
+    function checkDrawGame() {
+        //call this after checkendgame since the last possible move could win first
+        let i, j
+        for (i = 0; i < gameData.length; i++) {
+            for (j = 0; j < gameData[i].length; j++) {
+                if (gameData[i][j] === 0) return 0
+            }
+        }
+        //we only get here if the gris is completely filled!
+        endGame(0)
+
+    }
+
+    function checkEndgame() {
+        let winner
+        winner = checkHorizontalWin()
+        if (winner == 0) {
+
+            winner = checkVerticalWin()
+            if (winner == 0) {
+
+                winner = checkDiagonalUp()
+                if (winner == 0) winner = checkDiagonalDown()
+            }
+        }
+
+        if (winner != 0) { endGame(winner) }
+        return winner
+
+    }
+
+    function checkHorizontalWin() {
+        //Note: not optimised at all!
+        //returns the player who won or 0
+        //console.log(gameData)
+        let i, j, k
+        for (i = 0; i < gameData.length; i++) {
+            for (j = 0; j < gameData[i].length - (connectCount - 1); j++) {
+                //console.log("a!")
+                if (gameData[i][j] !== 0) {
+                    let currentlyCheckedPlayer = gameData[i][j]
+                    let currentlyCheckedConnected = 1
+                    for (k = j + 1; k < gameData[i].length; k++) {
+                        if (gameData[i][k] !== currentlyCheckedPlayer) break
+                        currentlyCheckedConnected += 1
+                    }
+                    if (currentlyCheckedConnected >= connectCount) {
+                        //update the display!
+                        for (k = j; currentlyCheckedConnected > 0; k++) {
+                            gameElements[i][k].classList.add("game_end")
+                            currentlyCheckedConnected -= 1
+                        }
+                        return currentlyCheckedPlayer
+                    }
+                }
+            }
+        }
+        return 0
+    }
+
+    //connectCount
+
+    function checkVerticalWin() {
+        //Note: not optimised at all!
+        //returns the player who won or 0
+        //console.log(gameData)
+        let i, j, k
+        for (i = 0; i < gameData.length - (connectCount - 1); i++) {
+            for (j = 0; j < gameData[i].length; j++) {
+                //console.log("a!")
+                if (gameData[i][j] !== 0) {
+                    let currentlyCheckedPlayer = gameData[i][j]
+                    let currentlyCheckedConnected = 1
+                    for (k = i + 1; k < gameData.length; k++) {
+                        if (gameData[k][j] !== currentlyCheckedPlayer) break
+                        currentlyCheckedConnected += 1
+                    }
+                    if (currentlyCheckedConnected >= connectCount) {
+                        //update the display!
+                        for (k = i; currentlyCheckedConnected > 0; k++) {
+                            gameElements[k][j].classList.add("game_end")
+                            currentlyCheckedConnected -= 1
+                        }
+                        return currentlyCheckedPlayer
+                    }
+                }
+            }
+        }
+        return 0
+    }
+
+    function checkDiagonalDown() {
+        //Note: not optimised at all!
+        //returns the player who won or 0
+        //console.log(gameData)
+        let i, j, k, l
+        for (i = 0; i < gameData.length - (connectCount - 1); i++) {
+            for (j = 0; j < gameData[i].length - (connectCount - 1); j++) {
+                //console.log("a!")
+                if (gameData[i][j] !== 0) {
+                    let currentlyCheckedPlayer = gameData[i][j]
+                    let currentlyCheckedConnected = 1
+                    for (k = i + 1, l = j + 1; k < gameData.length && l < gameData[k].length; k++, l++) {
+                        if (gameData[k][l] !== currentlyCheckedPlayer) break
+                        currentlyCheckedConnected += 1
+                    }
+                    if (currentlyCheckedConnected >= connectCount) {
+                        //update the display!
+                        for (k = i, l = j; currentlyCheckedConnected > 0; k++, l++) {
+                            gameElements[k][l].classList.add("game_end")
+                            currentlyCheckedConnected -= 1
+                        }
+                        //console.log("DiagDown")
+                        return currentlyCheckedPlayer
+                    }
+                }
+            }
+        }
+        return 0
+    }
+
+    function checkDiagonalUp() {
+        let i, j, k, l
+        for (i = 0; i < gameData.length - (connectCount - 1); i++) { //gameData.length - (connectCount - 1)
+            for (j = connectCount - 1; j < gameData[i].length; j++) { //j should be initialised better than 0 for optimise
+                //console.log("a!")
+                if (gameData[i][j] !== 0) {
+                    let currentlyCheckedPlayer = gameData[i][j]
+                    let currentlyCheckedConnected = 1
+                    for (k = i + 1, l = j - 1; k < gameData.length && l >= 0; k++, l--) {
+                        if (gameData[k][l] !== currentlyCheckedPlayer) break
+                        currentlyCheckedConnected += 1
+                    }
+                    if (currentlyCheckedConnected >= connectCount) {
+                        //update the display!
+                        for (k = i, l = j; currentlyCheckedConnected > 0; k++, l--) {
+                            gameElements[k][l].classList.add("game_end")
+                            currentlyCheckedConnected -= 1
+                        }
+                        //console.log("DiagUp")
+                        return currentlyCheckedPlayer
+                    }
+                }
+            }
+        }
+        return 0
+    }
+
+    function clearLayout() {
+
+        let game = document.getElementById("gameConnectX")
+        while (game.firstChild) game.removeChild(game.lastChild)
+
+    }
+
+    function resetGame() {
+
+        //console.log("Reset")
+        document.getElementById("message").innerHTML = "Game started"
+        clearLayout()
+        gameEnded = false
+        gameElements = buildGame(columnCount, rowCount)
+        gameData = buildGameData(columnCount, rowCount)
+
+    }
+
+    function endGame(playerID) {
+        gameEnded = true
+        if (playerID === 0) {
+            document.getElementById("message").innerHTML = "Draw game! Click setup to re-start"
+        } else {
+            document.getElementById("message").innerHTML = "Game won by player " + playerID + "!"
+        }
+    }
+
+    function setupGame() {
+        //get the values if possible
+
+        let maxColumn = 100
+        let maxRow = 100
+
+        let newColumnCount = parseInt(document.getElementById("column_input").value)
+        let newRowCount = parseInt(document.getElementById("row_input").value)
+        let newConnectCount = parseInt(document.getElementById("connect_input").value)
+
+        console.log([newColumnCount, newRowCount, newConnectCount])
+
+        if ((newColumnCount > 0) && (newColumnCount < maxColumn) &&
+            (newRowCount > 0) && (newRowCount < maxRow) &&
+            (newConnectCount > 0) &&
+            ((newConnectCount <= newColumnCount) ||
+                (newConnectCount <= newRowCount))) {
+
+            rowCount = newRowCount
+            columnCount = newColumnCount
+            connectCount = newConnectCount
+
+            //start the game
+            resetGame()
+        } else {
+            document.getElementById("message").innerHTML = "Choose some better settings. 0 < Columns < " + maxColumn + ", 0 < Rows < " + maxRow + ", ConnectX > 0 and Columns >= ConnectX <= Rows"
+        }
+
+    }
+
+</script>
+
+</html>

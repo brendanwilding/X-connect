@@ -26,7 +26,7 @@
 		<SCRIPT__contact_form		u='e/s'	/>
 
 
-		<SOCKET__io		_u='http://z2:3001'	/>
+		<SOCKET__io		_u='http://0.0.0.0:3000'	/>
 	</loc>
 
 <!--	========================	========================	========================	-->
@@ -43,7 +43,7 @@
 
 	<header>
 		<head_l_logo	i='images/react_sha.png'		u='/'		/>
-		<site_title		txt='X Tic Tac Toe'				u='/'		/>
+		<site_title		txt='X Connect X'				u='/'		/>
 	</header>
 
 <!--	========================	========================	========================	-->
@@ -55,7 +55,7 @@
 			<i 		tp='ln'			txt='privacy'					u='pupg/privacy-policy'	/>
 			<i 		tp='ln'			txt='contact us'				u='contact-us'	/>
 		</items>
-		<foot_msg		txt='A simple Tic Tac Toe game demo built with React.js and Node.js.'	/>
+		<foot_msg		txt='A simple Connect X game demo built with React.js and Node.js.'	/>
 		<foot_r_logo	i='images/K_logo.png'	u='http://www.kisla.com'	t='_blank'		/>
 	</footer>
 
@@ -71,7 +71,7 @@
 		<home		pg_name="Home">
 			<txt>
 			<![CDATA[
-				<div>This is a simple X Tic Tac Toe multiplayer demo game. It's built with React.js and Node.js.</div>
+				<div>This is a simple Connect X multiplayer demo game. It's built with React.js and Node.js.</div>
 				
 				<div>
 				view source at  <a href='https://github.com/xims/X-ttt'>github.com/xims/X-ttt</a></div>
