@@ -35,7 +35,7 @@
     "react-imageloader": "^2.1.0",
     "react-motion": "^0.4.4",
     "react-router": "^2.5.2",
-    "socket.io": "^1.4.8",
+    "socket.io": "^4.5.3",
     "superagent": "^2.0.0",
     "validator": "^5.4.0",
     "x2js": "^2.0.1"
